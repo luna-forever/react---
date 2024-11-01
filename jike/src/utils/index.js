@@ -1,3 +1,4 @@
-import {request} from '@/utils'
+import {request} from './request'
+import { setToken,getToken,clearToken } from './token'
 
-export {request}
+export {request,setToken,getToken,clearToken}
