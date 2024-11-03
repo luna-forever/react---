@@ -1,31 +1,47 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { request } from '@/utils'
-import { getToken,setToken as _setToken } from '@/utils'
+import { clearToken, request } from '@/utils'
+import { getToken,setToken } from '@/utils'
 
 const userStore=createSlice({
     name:'user',
     initialState:{
-        token:getToken()||''
+        token:getToken()||'',
+        userInfo:{}
     },
     reducers:{
-        setToken(state,action){
+        setUserToken(state,action){
             state.token=action.payload
-            _setToken(action.payload)
+            setToken(action.payload)
+        },
+        setUserInfo(state,action){
+            state.userInfo=action.payload
+        },
+        clearUserInfo(state){
+            state.token=''
+            state.userInfo={}
+            clearToken()
         }
     }
 })
 
-const {setToken}=userStore.actions
+const {setUserToken,setUserInfo,clearUserInfo}=userStore.actions
 const userReducer=userStore.reducer
 
 const fetchToken=(form)=>{
     return async (dispatch)=>{
         const res=await request.post('/authorizations',form)
         console.log(res)
-        console.log(res.data.data.token)
-        dispatch(setToken(res.data.data.token))
+        dispatch(setUserToken(res.data.data.token))
     }
 }
 
-export {setToken,fetchToken}
+const fetchUserInfo=()=>{
+    return async (dispatch)=>{
+        const res=await request.get('/user/profile')
+        console.log(res)
+        dispatch(setUserInfo(res.data.data))
+    }
+}
+
+export {setUserToken,fetchToken,fetchUserInfo,clearUserInfo}
 export default userReducer
