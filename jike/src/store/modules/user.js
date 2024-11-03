@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { clearToken, request } from '@/utils'
+import { clearToken } from '@/utils'
 import { getToken,setToken } from '@/utils'
+import { loginAPI, userAPI } from '@/apis/user'
 
 const userStore=createSlice({
     name:'user',
@@ -29,7 +30,7 @@ const userReducer=userStore.reducer
 
 const fetchToken=(form)=>{
     return async (dispatch)=>{
-        const res=await request.post('/authorizations',form)
+        const res=await loginAPI(form)
         console.log(res)
         dispatch(setUserToken(res.data.data.token))
     }
@@ -37,7 +38,7 @@ const fetchToken=(form)=>{
 
 const fetchUserInfo=()=>{
     return async (dispatch)=>{
-        const res=await request.get('/user/profile')
+        const res=await userAPI()
         console.log(res)
         dispatch(setUserInfo(res.data.data))
     }
