@@ -14,3 +14,11 @@ export function publishAPI(data){
         data
     })
 }
+
+export function getArticleAPI(params){
+    return request({
+        url:'/mp/articles',
+        method:'GET',
+        params
+    })
+}

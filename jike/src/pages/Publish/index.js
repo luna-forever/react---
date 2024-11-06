@@ -15,20 +15,14 @@ import { Link } from 'react-router-dom'
 import './index.scss'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import { getChannelAPI, publishAPI } from '@/apis/article'
-import { useEffect, useState } from 'react'
+import { publishAPI } from '@/apis/article'
+import { useState } from 'react'
+import { useChannel } from '@/hooks/useChannel'
 
 const { Option } = Select
 
 const Publish = () => {
-  const [channel,setChannel]=useState([])
-  useEffect(()=>{
-    async function fetchChannel(){
-      const res=await getChannelAPI()
-      setChannel(res.data.data.channels)
-    }
-    fetchChannel()
-  },[])
+  const {channelList}=useChannel()
   const onFinish=async (form)=>{
     if(imageType!==imageList.length) return message.error('请上传正确数量的图片')
     const {channel_id, content, title}=form
@@ -84,7 +78,7 @@ const Publish = () => {
             rules={[{ required: true, message: '请选择文章频道' }]}
           >
             <Select placeholder="请选择文章频道" style={{ width: 400 }}>
-              {channel.map(item=>(
+              {channelList.map(item=>(
                 <Option key={item.id} value={item.id}>{item.name}</Option>
               ))}
             </Select>
