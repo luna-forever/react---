@@ -1,17 +1,18 @@
-import { Link } from 'react-router-dom'
-import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select } from 'antd'
+import { Link, useNavigate } from 'react-router-dom'
+import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select, Popconfirm } from 'antd'
 import locale from 'antd/es/date-picker/locale/zh_CN'
 import { Table, Tag, Space } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import img404 from '@/assets/error.png'
 import { useChannel } from '@/hooks/useChannel'
 import { useEffect, useState } from 'react'
-import { getArticleAPI } from '@/apis/article'
+import { deleteAPI, getArticleAPI } from '@/apis/article'
 
 const { Option } = Select
 const { RangePicker } = DatePicker
 
 const Article = () => {
+  const navigate=useNavigate()
   const status={
     1:<Tag color='warning'>待审核</Tag>,
     2:<Tag color='success'>审核通过</Tag>
@@ -56,13 +57,15 @@ const Article = () => {
       render: data => {
         return (
           <Space size="middle">
-            <Button type="primary" shape="circle" icon={<EditOutlined />} />
-            <Button
-              type="primary"
-              danger
-              shape="circle"
-              icon={<DeleteOutlined />}
-            />
+            <Button type="primary" shape="circle" onClick={()=>navigate(`/publish?id=${data.id}`)} icon={<EditOutlined />} />
+            <Popconfirm title="确认删除该条文章吗?" onConfirm={()=>delArticle(data)} okText="确认" cancelText="取消">
+              <Button
+                type="primary"
+                danger
+                shape="circle"
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
           </Space>
         )
       }
@@ -101,6 +104,13 @@ const Article = () => {
     setParams({
       ...params,
       page
+    })
+  }
+  const delArticle=async (data)=>{
+    console.log(data)
+    await deleteAPI(data)
+    setParams({
+      ...params
     })
   }
   return (
