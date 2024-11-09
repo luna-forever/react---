@@ -11,18 +11,19 @@ import {
   message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './index.scss'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import { publishAPI } from '@/apis/article'
-import { useState } from 'react'
+import { getArticleByIdAPI, publishAPI, updateAPI } from '@/apis/article'
+import { useEffect, useState } from 'react'
 import { useChannel } from '@/hooks/useChannel'
 
 const { Option } = Select
 
 const Publish = () => {
   const {channelList}=useChannel()
+  const navigate=useNavigate()
   const onFinish=async (form)=>{
     if(imageType!==imageList.length) return message.error('请上传正确数量的图片')
     const {channel_id, content, title}=form
@@ -33,28 +34,51 @@ const Publish = () => {
       type: imageType,
       cover: {
         type:imageType,
-        images:imageList.map(item=>item.response.data.url)
+        images:imageList.map(item=>{
+          if(item.response){
+            return item.response.data.url
+          }else{
+            return item.url
+          }
+        })
       }
     }
-    await publishAPI(data)
-    message.success('发布成功')
+    if(id){
+      await updateAPI({...data,id})
+    }else{
+      await publishAPI(data)
+    }
+    message.success(`${id?'编辑':'发布'}文章成功`)
+    navigate('/article')
   }
   const [imageList, setImageList] = useState([])
   const [imageType, setImageType] = useState(0)
+  const [params]=useSearchParams()
+  const id=params.get('id')
+  const [form]=Form.useForm()
   const onUpload=(value)=>{
     setImageList(value.fileList)
-    console.log(imageList)
   }
   const onType=(e)=>{
     setImageType(e.target.value)
   }
+  useEffect(()=>{
+    async function getArticle(){
+      const res=await getArticleByIdAPI(id)
+      const {cover,...formValue}=res.data.data
+      form.setFieldsValue({...formValue,type:cover.type})
+      setImageType(cover.type)
+      setImageList(cover.images.map(url=>{return {url}}))
+    }
+    if(id) getArticle()
+  },[id,form])
   return (
     <div className="publish">
       <Card
         title={
           <Breadcrumb items={[
             { title: <Link to={'/'}>首页</Link> },
-            { title: '发布文章' },
+            { title: `${id?'编辑':'发布'}文章` },
           ]}
           />
         }
@@ -64,6 +88,7 @@ const Publish = () => {
           wrapperCol={{ span: 16 }}
           initialValues={{ type: 0 }}
           onFinish={onFinish}
+          form={form}
         >
           <Form.Item
             label="标题"
@@ -100,6 +125,7 @@ const Publish = () => {
               name='image'
               maxCount={imageType}
               multiple={imageType>1}
+              fileList={imageList}
             >
               <div style={{ marginTop: 8 }}>
                 <PlusOutlined />

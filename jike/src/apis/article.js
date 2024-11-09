@@ -29,3 +29,18 @@ export function deleteAPI(data){
         method:'DELETE'
     })
 }
+
+export function getArticleByIdAPI(id){
+    return request({
+        url:`/mp/articles/${id}`,
+        method:'GET'
+    })
+}
+
+export function updateAPI(data){
+    return request({
+        url:`/mp/articles/${data.id}?draft=false`,
+        method:'PUT',
+        data
+    })
+}

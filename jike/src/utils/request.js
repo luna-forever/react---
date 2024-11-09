@@ -22,7 +22,7 @@ request.interceptors.request.use((config)=> {
 request.interceptors.response.use((response)=> {
     return response
   }, (error)=> {
-    if(error.response.status===401){
+    if(error.response &&error.response.status===401){
       clearToken()
       router.navigate('/login')
       window.location.reload()
